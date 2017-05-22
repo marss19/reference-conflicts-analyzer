@@ -104,7 +104,7 @@ namespace ReferenceConflictAnalyser
             {
                 if (referencedVersions.ContainsKey(reference.ReferencedAssembly.Name))
                 {
-                    if (referencedVersions[reference.ReferencedAssembly.Name] != reference.ReferencedAssembly.Version)
+                    if (!AreVersionCompatible(referencedVersions[reference.ReferencedAssembly.Name], reference.ReferencedAssembly.Version))
                     {
                         _result.AddConflict(reference.ReferencedAssembly);
                     }
@@ -135,12 +135,22 @@ namespace ReferenceConflictAnalyser
                 if (bindingRedirect == null)
                     continue;
 
-                if (conflict.Version >= bindingRedirect.OldVersionLowerBound
-                   && conflict.Version <= bindingRedirect.OldVersionUpperBound)
+                var mainVersion = new Version(conflict.Version.Major, conflict.Version.Minor);
+
+                if (mainVersion >= bindingRedirect.OldVersionLowerBound
+                   && mainVersion <= bindingRedirect.OldVersionUpperBound)
                 {
                     _result.MarkConflictAsResolved(conflict);
                 }
             }
+        }
+
+        private bool AreVersionCompatible(Version version1, Version version2)
+        {
+            //versions are considered compatible if they differ in build or revision only
+
+            return version1.Major == version2.Major
+                && version1.Minor == version2.Minor;
         }
 
         #endregion

@@ -15,14 +15,22 @@ namespace ReferenceConflictAnalyser.ConsoleApp
         {
             var reader = new ReferenceReader();
             var entryAssemblyPath = args[0];
+
+            while (string.IsNullOrWhiteSpace(entryAssemblyPath))
+            {
+                Console.WriteLine("Enter path to assembly to analyze:");
+                entryAssemblyPath = Console.ReadLine();
+            }
+
             string configFilePath;
             ConfigurationHelper.TrySuggestConfigFile(entryAssemblyPath, out configFilePath);
 
             var result = reader.Read(entryAssemblyPath, configFilePath);
 
 
-            Console.WriteLine("Select mode: C - outout to console, D - output to dgml file");
+            Console.WriteLine("Select outout mode: C - outout to console, D - output to dgml file");
             var mode = Console.ReadKey();
+            Console.WriteLine();
 
             switch (mode.Key)
             {
@@ -51,13 +59,18 @@ namespace ReferenceConflictAnalyser.ConsoleApp
         private static void WriteReferencesToConsole(ReferenceList result)
         {
             Console.WriteLine("References:");
-            foreach (var reference in result.References)
-                Console.WriteLine(reference);
+            foreach (var item in result.References)
+                Console.WriteLine($"{item.Assembly.Name} {item.Assembly.Version} -> {item.ReferencedAssembly.Name} {item.ReferencedAssembly.Version}");
 
             Console.WriteLine();
             Console.WriteLine("Errors:");
             foreach (var err in result.LoadingErrors)
                 Console.WriteLine(err);
+
+            Console.WriteLine();
+            Console.WriteLine("Assemblies:");
+            foreach (var item in result.Assemblies)
+                Console.WriteLine($"{item.Key.Name} {item.Key.Version}: {item.Value}");
 
             Console.ReadKey();
         }

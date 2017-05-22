@@ -73,8 +73,8 @@ namespace ReferenceConflictAnalyser
                     };
 
                     var oldVersions = bindingRedirectElem.Attributes["oldVersion"].Value.Split('-');
-                    data.OldVersionLowerBound = new Version(oldVersions[0]);
-                    data.OldVersionUpperBound = oldVersions.Count() > 1 ? new Version(oldVersions[1]) : data.OldVersionLowerBound;
+                    data.OldVersionLowerBound = GetMainVersion(oldVersions[0]);
+                    data.OldVersionUpperBound = oldVersions.Count() > 1 ? GetMainVersion(oldVersions[1]) : data.OldVersionLowerBound;
 
                     redirects.Add(data);
                 }
@@ -83,8 +83,12 @@ namespace ReferenceConflictAnalyser
             {
             }
             return redirects;
+        }
 
-
+        private static Version GetMainVersion(string versionStr)
+        {
+            var temp = new Version(versionStr);
+            return new Version(temp.Major, temp.Minor);
         }
 
 
