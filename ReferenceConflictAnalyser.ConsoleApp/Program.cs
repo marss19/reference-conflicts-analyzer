@@ -63,11 +63,6 @@ namespace ReferenceConflictAnalyser.ConsoleApp
                 Console.WriteLine($"{item.Assembly.Name} {item.Assembly.Version} -> {item.ReferencedAssembly.Name} {item.ReferencedAssembly.Version}");
 
             Console.WriteLine();
-            Console.WriteLine("Errors:");
-            foreach (var err in result.LoadingErrors)
-                Console.WriteLine(err);
-
-            Console.WriteLine();
             Console.WriteLine("Assemblies:");
             foreach (var item in result.Assemblies)
                 Console.WriteLine($"{item.Key.Name} {item.Key.Version}: {item.Value}");

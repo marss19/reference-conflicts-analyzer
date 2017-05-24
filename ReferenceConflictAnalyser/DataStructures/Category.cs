@@ -18,7 +18,11 @@ namespace ReferenceConflictAnalyser.DataStructures
         [Description("Conflicted reference")]
         Conflicted,
 
-        [Description("Conflicted but resolved by means of config file")]
-        ConflictResolved
+        [Description("Conflicted reference but resolved by means of config file")]
+        ConflictResolved,
+
+        [Description("Missed assembly")]
+        Missed,
+
     }
 }

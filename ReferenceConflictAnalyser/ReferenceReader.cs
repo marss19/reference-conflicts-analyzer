@@ -52,23 +52,22 @@ namespace ReferenceConflictAnalyser
                     )
                     continue;
 
-                var referencedAssembly = LoadReferenceAssembly(reference);
-                var isNewReference = _result.AddReference(assembly.GetName(), reference);
-
+                var referencedAssembly = LoadReferencedAssembly(reference);
                 if (referencedAssembly != null)
                 {
+                    var isNewReference = _result.AddReference(assembly.GetName(), reference, Category.Normal);
                     if (isNewReference)
                         ReadReferences(referencedAssembly);
                 }
                 else
                 {
-                    _result.AddError(reference);
+                    _result.AddReference(assembly.GetName(), reference, Category.Missed);
                 }
             }
 
         }
 
-        private Assembly LoadReferenceAssembly(AssemblyName reference)
+        private Assembly LoadReferencedAssembly(AssemblyName reference)
         {
             if (_cache.ContainsKey(reference.FullName))
                 return _cache[reference.FullName];

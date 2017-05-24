@@ -14,25 +14,20 @@ namespace ReferenceConflictAnalyser.DataStructures
             AddAssembly(assembly, Category.EntryPoint);
         }
 
-        public bool AddReference(AssemblyName assembly, AssemblyName referencedAssembly)
+        public bool AddReference(AssemblyName assembly, AssemblyName referencedAssembly, Category category)
         {
             var reference = new Reference(assembly, referencedAssembly);
 
-            AddAssembly(referencedAssembly, Category.Normal);
+            AddAssembly(referencedAssembly, category);
 
             return _references.Add(reference);
         }
 
-        public void AddError(AssemblyName assembly)
-        {
-            _errors.Add(assembly);
-        }
-
         public void AddConflict(AssemblyName referencedAssembly)
         {
-            var conflicts = _assemblies.Keys.Where(x => x.Name == referencedAssembly.Name).ToArray();
+            var conflicts = _assemblies.Where(x => x.Key.Name == referencedAssembly.Name && x.Value == Category.Normal).ToArray();
             foreach(var conflict in conflicts)
-              _assemblies[conflict] = Category.Conflicted;
+                _assemblies[conflict.Key] = Category.Conflicted;
         }
 
         public void MarkConflictAsResolved(ReferencedAssembly referencedAssembly)
@@ -42,13 +37,11 @@ namespace ReferenceConflictAnalyser.DataStructures
 
 
         public HashSet<Reference> References => _references;
-        public HashSet<AssemblyName> LoadingErrors => _errors;
         public Dictionary<ReferencedAssembly, Category> Assemblies => _assemblies;
 
         #region private members
 
         private readonly HashSet<Reference> _references = new HashSet<Reference>();
-        private readonly HashSet<AssemblyName> _errors = new HashSet<AssemblyName>();
         private readonly Dictionary<ReferencedAssembly, Category> _assemblies = new Dictionary<ReferencedAssembly, Category>();
 
         private void AddAssembly(AssemblyName assemblyName, Category category)

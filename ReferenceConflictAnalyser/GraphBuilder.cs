@@ -40,7 +40,8 @@ namespace ReferenceConflictAnalyser
             { Category.EntryPoint, Color.LightGreen },
             { Category.Normal , Color.White },
             { Category.ConflictResolved, Color.Khaki },
-            { Category.Conflicted, Color.LightSalmon }
+            { Category.Conflicted, Color.LightSalmon },
+            { Category.Missed, Color.Red }
         };
 
         private ReferenceList _referenceList;
@@ -99,24 +100,42 @@ namespace ReferenceConflictAnalyser
         private void AddStyles(XmlNode parent)
         {
             var stylesElement = parent.AppendChild(_doc.CreateElement("Styles", XmlNamespace));
-            foreach(var category in _categories)
+            foreach (var category in _categories)
             {
-                var styleElement = _doc.CreateElement("Style", XmlNamespace);
-                styleElement.Attributes.Append(AddXmlAtribute("TargetType", "Node"));
-                styleElement.Attributes.Append(AddXmlAtribute("GroupLabel", EnumHelper.GetDescription<Category>(category.Key)));
-                stylesElement.AppendChild(styleElement);
+                AddStyle(stylesElement,
+                    targetType: "Node", 
+                    groupLabel: EnumHelper.GetDescription<Category>(category.Key), 
+                    condition: string.Format("HasCategory('{0}')", category.Key), 
+                    propertyName: "Background", 
+                    propertyValue: ColorTranslator.ToHtml(category.Value));
 
-                var conditionElement = _doc.CreateElement("Condition", XmlNamespace);
-                conditionElement.Attributes.Append(AddXmlAtribute("Expression", string.Format("HasCategory('{0}')", category.Key)));
-                styleElement.AppendChild(conditionElement);
-
-                var setterElement = _doc.CreateElement("Setter", XmlNamespace);
-                setterElement.Attributes.Append(AddXmlAtribute("Property", "Background"));
-                setterElement.Attributes.Append(AddXmlAtribute("Value", ColorTranslator.ToHtml(category.Value)));
-                styleElement.AppendChild(setterElement);
-
+                if (category.Key == Category.Conflicted || category.Key == Category.Missed)
+                {
+                    AddStyle(stylesElement,
+                       targetType: "Link",
+                       groupLabel: category.Key == Category.Conflicted ? "Link to conflicted reference" : "Link to missed assembly",
+                       condition: string.Format("Target.HasCategory('{0}')", category.Key),
+                       propertyName: "Stroke",
+                       propertyValue: ColorTranslator.ToHtml(category.Value));
+                }
             }
+        }
 
+        private void AddStyle(XmlNode parent, string targetType, string groupLabel, string condition, string propertyName, string propertyValue)
+        {
+            var styleElement = _doc.CreateElement("Style", XmlNamespace);
+            styleElement.Attributes.Append(AddXmlAtribute("TargetType", targetType));
+            styleElement.Attributes.Append(AddXmlAtribute("GroupLabel", groupLabel));
+            parent.AppendChild(styleElement);
+
+            var conditionElement = _doc.CreateElement("Condition", XmlNamespace);
+            conditionElement.Attributes.Append(AddXmlAtribute("Expression", condition));
+            styleElement.AppendChild(conditionElement);
+
+            var setterElement = _doc.CreateElement("Setter", XmlNamespace);
+            setterElement.Attributes.Append(AddXmlAtribute("Property", propertyName));
+            setterElement.Attributes.Append(AddXmlAtribute("Value", propertyValue));
+            styleElement.AppendChild(setterElement);
         }
 
         #endregion
