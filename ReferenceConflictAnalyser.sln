@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceConflictAnalyser.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceConflictAnalyser", "ReferenceConflictAnalyser\ReferenceConflictAnalyser.csproj", "{28335ADD-45DE-44A3-97FF-0640330554EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceConflictAnalyser.VSExtension", "ReferenceConflictAnalyser.VSExtension\ReferenceConflictAnalyser.VSExtension.csproj", "{F947F475-F430-47F3-AC07-34870DFA3996}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{28335ADD-45DE-44A3-97FF-0640330554EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28335ADD-45DE-44A3-97FF-0640330554EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28335ADD-45DE-44A3-97FF-0640330554EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F947F475-F430-47F3-AC07-34870DFA3996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F947F475-F430-47F3-AC07-34870DFA3996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F947F475-F430-47F3-AC07-34870DFA3996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F947F475-F430-47F3-AC07-34870DFA3996}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
