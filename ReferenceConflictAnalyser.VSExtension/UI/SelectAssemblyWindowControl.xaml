@@ -24,12 +24,12 @@
 
 
         <TextBlock Margin="3">Assembly to analyze</TextBlock>
-        <TextBox HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding AssemblyPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        <TextBox HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding AssemblyPath, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"></TextBox>
         <Button  Grid.Column="2" Margin="3" Command="{Binding SelectAssemblyCommand}" Content="..."  ToolTip="Browse..."></Button>
 
 
         <TextBlock Grid.Row="1" Margin="3">Related config file</TextBlock>
-        <TextBox Grid.Row="1" HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding ConfigPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        <TextBox Grid.Row="1" HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding ConfigPath, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"></TextBox>
         <Button Grid.Row="1" Grid.Column="2" Margin="3" Command="{Binding SelectConfigCommand}" Content="..." ToolTip="Browse..."></Button>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0 10 0 0">

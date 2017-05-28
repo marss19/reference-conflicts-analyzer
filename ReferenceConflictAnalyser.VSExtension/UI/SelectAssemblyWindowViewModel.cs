@@ -69,6 +69,10 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             if (dlg.ShowDialog() == true)
             {
                 AssemblyPath = dlg.FileName;
+
+                string configPath;
+                if (ConfigurationHelper.TrySuggestConfigFile(AssemblyPath, out configPath))
+                    ConfigPath = configPath;
             }
         }
 
@@ -97,7 +101,6 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
         private void CloseWindow()
         {
             ((IVsWindowFrame)_window.Frame).Hide();
-           // Application.Exit();
         }
 
         private void RunAnalysis()
