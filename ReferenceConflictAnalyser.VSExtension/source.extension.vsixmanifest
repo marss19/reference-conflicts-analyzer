@@ -6,8 +6,8 @@
     <Description xml:space="preserve">A tool for analysis of the "Could not load file or assembly or one of its dependencies" problem and issues related to conflicts of referenced assemblies.</Description>
   </Metadata>
   <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[12.0,)" />
-    <InstallationTarget Version="[12.0,)" Id="Microsoft.VisualStudio.Pro" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[12.0,15.0)" />
+    <InstallationTarget Version="[12.0,15.0)" Id="Microsoft.VisualStudio.Pro" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
