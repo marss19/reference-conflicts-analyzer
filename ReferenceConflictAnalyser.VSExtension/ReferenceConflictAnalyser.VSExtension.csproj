@@ -58,6 +58,8 @@
     <Compile Include="UI\SelectAssemblyWindowControl.xaml.cs">
       <DependentUpon>SelectAssemblyWindowControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\SelectAssemblyWindowViewModel.cs" />
+    <Compile Include="UI\Utils\GenericCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.snk" />

@@ -8,10 +8,32 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Center">ToolWindow1</TextBlock>
-            <Button Content="Click me!" Click="button1_Click" Width="120" Height="80" Name="button1"/>
+    <Grid Margin="10">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130px"></ColumnDefinition>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="40px"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+
+        <TextBlock Margin="3">Assembly to analyze</TextBlock>
+        <TextBox HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding AssemblyPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        <Button  Grid.Column="2" Margin="3" Command="{Binding SelectAssemblyCommand}" Content="..."  ToolTip="Browse..."></Button>
+
+
+        <TextBlock Grid.Row="1" Margin="3">Related config file</TextBlock>
+        <TextBox Grid.Row="1" HorizontalAlignment="Stretch" Grid.Column="1"  Margin="3" Text="{Binding ConfigPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        <Button Grid.Row="1" Grid.Column="2" Margin="3" Command="{Binding SelectConfigCommand}" Content="..." ToolTip="Browse..."></Button>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0 10 0 0">
+            <Button Margin="3" Command="{Binding AnalyzeConfigCommand}" Content="Analyze"></Button>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -6,6 +6,7 @@
 
 namespace ReferenceConflictAnalyser.VSExtension.UI
 {
+    using Microsoft.VisualStudio.Shell;
     using System.Diagnostics.CodeAnalysis;
     using System.Windows;
     using System.Windows.Controls;
@@ -18,9 +19,10 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectAssemblyWindowControl"/> class.
         /// </summary>
-        public SelectAssemblyWindowControl()
+        public SelectAssemblyWindowControl(ToolWindowPane parentWindow)
         {
             this.InitializeComponent();
+            this.DataContext = new SelectAssemblyWindowViewModel(parentWindow);
         }
 
         /// <summary>
