@@ -24,6 +24,8 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             SelectConfigCommand = new GenericCommand<SelectAssemblyWindowViewModel, object>(this, SelectConfig, CanSelectConfig);
             AnalyzeConfigCommand = new GenericCommand<SelectAssemblyWindowViewModel, object>(this, Analyze, CanAnalyze);
 
+            IgnoreSystemAssemblies = true;
+
             _window = window;
         }
 
@@ -43,12 +45,19 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             set { SetProperty(ref _configPath, value, "ConfigPath"); }
         }
 
+        public bool IgnoreSystemAssemblies
+        {
+            get { return _ignoreSystemAssemblies; }
+            set { SetProperty(ref _ignoreSystemAssemblies, value, "IgnoreSystemAssemblies"); }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region private
 
         private string _assemblyPath;
         private string _configPath;
+        private bool _ignoreSystemAssemblies;
         private ToolWindowPane _window;
 
         private void SetProperty<T>(ref T field, T newValue, string propertyName)
@@ -108,7 +117,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             try
             {
                 var reader = new ReferenceReader();
-                var result = reader.Read(AssemblyPath, ConfigPath);
+                var result = reader.Read(AssemblyPath, ConfigPath, IgnoreSystemAssemblies);
 
                 var builder = new GraphBuilder();
                 var doc = builder.BuildDgml(result);

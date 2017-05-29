@@ -5,6 +5,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -33,7 +34,10 @@ namespace ReferenceConflictAnalyser
 
                 case ".dll":
                     {
-                        var temp = Path.Combine(Path.GetDirectoryName(entryAssemblyFilePath), "web.config");
+                        var directory = Path.GetDirectoryName(entryAssemblyFilePath);
+                        var re = new Regex(@"\\bin\\?$", RegexOptions.IgnoreCase);
+                        directory = re.Replace(directory, "");
+                        var temp = Path.Combine(directory, "web.config");
                         if (File.Exists(temp))
                             configFilePath = temp;
                     }
