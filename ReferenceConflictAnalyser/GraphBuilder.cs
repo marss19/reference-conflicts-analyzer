@@ -24,6 +24,7 @@ namespace ReferenceConflictAnalyser
             var root = AddRootElement();
             AddNodes(root);
             AddLinks(root);
+            AddCategories(root);
             AddStyles(root);
 
             return _doc;
@@ -41,7 +42,7 @@ namespace ReferenceConflictAnalyser
             { Category.Normal , Color.White },
             { Category.ConflictResolved, Color.Khaki },
             { Category.Conflicted, Color.LightSalmon },
-            { Category.Missed, Color.Red }
+            { Category.Missed, Color.Crimson }
         };
 
         private ReferenceList _referenceList;
@@ -50,16 +51,16 @@ namespace ReferenceConflictAnalyser
 
         private XmlNode AddRootElement()
         {
-            var root = _doc.AppendChild(_doc.CreateElement("DirectedGraph", XmlNamespace));
-            root.Attributes.Append(AddXmlAtribute("GraphDirection", "BottomToTop"));
-            root.Attributes.Append(AddXmlAtribute("Layout", "Sugiyama"));
+            var root = _doc.AppendChild(CreateXmlElement("DirectedGraph", new Dictionary<string, string>
+            {
+                { "GraphDirection", "BottomToTop"},
+                { "Layout", "Sugiyama"}
+            }));
             return root;
         }
 
         private void AddNodes(XmlNode parent)
         {
-            var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
-
             var uniqueAssemblies = new Dictionary<string, Category>();
             foreach (var assembly in _referenceList.Assemblies)
             {
@@ -67,34 +68,37 @@ namespace ReferenceConflictAnalyser
                     uniqueAssemblies.Add(assembly.Key.Name, assembly.Value);
             }
 
+            var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
             foreach (var item in uniqueAssemblies)
-            {
-                var nodeElement = _doc.CreateElement("Node", XmlNamespace);
-                nodeElement.Attributes.Append(AddXmlAtribute("Id", item.Key.ToLower()));
-                nodeElement.Attributes.Append(AddXmlAtribute("Label", item.Key));
-                nodeElement.Attributes.Append(AddXmlAtribute("Category", item.Value.ToString()));
-                nodesElement.AppendChild(nodeElement);
-            }
+                nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+                {
+                    { "Id", item.Key.ToLower()},
+                    { "Label", item.Key},
+                    { "Category", item.Value.ToString()}
+                }));
         }
 
         private void AddLinks(XmlNode parent)
         {
             var linksElement = parent.AppendChild(_doc.CreateElement("Links", XmlNamespace));
             foreach (var reference in _referenceList.References)
-            {
-                var elem = _doc.CreateElement("Link", XmlNamespace);
-                elem.Attributes.Append(AddXmlAtribute("Source", reference.Assembly.Name.ToLower()));
-                elem.Attributes.Append(AddXmlAtribute("Target", reference.ReferencedAssembly.Name.ToLower()));
-                elem.Attributes.Append(AddXmlAtribute("Label", reference.ReferencedAssembly.Version.ToString()));
-                linksElement.AppendChild(elem);
-            }
+                linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
+                {
+                    { "Source", reference.Assembly.Name.ToLower()},
+                    { "Target", reference.ReferencedAssembly.Name.ToLower()},
+                    { "Label", reference.ReferencedAssembly.Version.ToString()}
+                }));
         }
 
-        private XmlAttribute AddXmlAtribute(string name, string value)
+        private void AddCategories(XmlNode parent)
         {
-            var attribute = _doc.CreateAttribute(name);
-            attribute.Value = value;
-            return attribute;
+            var categoriesElement = parent.AppendChild(_doc.CreateElement("Categories", XmlNamespace));
+            foreach (var category in _categories)
+                categoriesElement.AppendChild(CreateXmlElement("Category", new Dictionary<string, string>
+                {
+                    { "Id", category.Key.ToString() },
+                    { "Label", EnumHelper.GetDescription(category.Key)}
+                }));
         }
 
         private void AddStyles(XmlNode parent)
@@ -102,40 +106,67 @@ namespace ReferenceConflictAnalyser
             var stylesElement = parent.AppendChild(_doc.CreateElement("Styles", XmlNamespace));
             foreach (var category in _categories)
             {
-                AddStyle(stylesElement,
-                    targetType: "Node", 
-                    groupLabel: EnumHelper.GetDescription<Category>(category.Key), 
-                    condition: string.Format("HasCategory('{0}')", category.Key), 
-                    propertyName: "Background", 
-                    propertyValue: ColorTranslator.ToHtml(category.Value));
-
-                if (category.Key == Category.Conflicted || category.Key == Category.Missed)
-                {
-                    AddStyle(stylesElement,
-                       targetType: "Link",
-                       groupLabel: category.Key == Category.Conflicted ? "Link to conflicted reference" : "Link to missed assembly",
-                       condition: string.Format("Target.HasCategory('{0}')", category.Key),
-                       propertyName: "Stroke",
-                       propertyValue: ColorTranslator.ToHtml(category.Value));
-                }
+                stylesElement.AppendChild(CreateStyleElement("Node", 
+                    EnumHelper.GetDescription(category.Key), 
+                    $"HasCategory('{category.Key}')", 
+                    new Dictionary<string, string>
+                                {
+                                        { "Background", ColorTranslator.ToHtml(category.Value) }
+                                }));
             }
+
+            stylesElement.AppendChild(CreateStyleElement("Link",
+                      "Link to conflicted reference",
+                      $"Target.HasCategory('{Category.Conflicted}')",
+                      new Dictionary<string, string>
+                      {
+                            { "Stroke", ColorTranslator.ToHtml(_categories[Category.Conflicted]) },
+                            { "StrokeThickness", "3" }
+                      }));
+
+            stylesElement.AppendChild(CreateStyleElement("Link",
+                      "Link to missed reference",
+                      $"Target.HasCategory('{Category.Missed}')",
+                      new Dictionary<string, string>
+                      {
+                            { "Stroke", ColorTranslator.ToHtml(_categories[Category.Missed]) },
+                            { "StrokeThickness", "3" }
+                      }));
         }
 
-        private void AddStyle(XmlNode parent, string targetType, string groupLabel, string condition, string propertyName, string propertyValue)
+        private XmlElement CreateXmlElement(string elementName, Dictionary<string, string> attributes)
+        {
+            var elem = _doc.CreateElement(elementName, XmlNamespace);
+            foreach (var attibute in attributes)
+                elem.Attributes.Append(CreateXmlAtribute(attibute.Key, attibute.Value));
+            return elem;
+        }
+
+        private XmlAttribute CreateXmlAtribute(string name, string value)
+        {
+            var attribute = _doc.CreateAttribute(name);
+            attribute.Value = value;
+            return attribute;
+        }
+
+        private XmlElement CreateStyleElement(string targetType, string groupLabel, string condition, Dictionary<string, string> properties)
         {
             var styleElement = _doc.CreateElement("Style", XmlNamespace);
-            styleElement.Attributes.Append(AddXmlAtribute("TargetType", targetType));
-            styleElement.Attributes.Append(AddXmlAtribute("GroupLabel", groupLabel));
-            parent.AppendChild(styleElement);
+            styleElement.Attributes.Append(CreateXmlAtribute("TargetType", targetType));
+            styleElement.Attributes.Append(CreateXmlAtribute("GroupLabel", groupLabel));
 
             var conditionElement = _doc.CreateElement("Condition", XmlNamespace);
-            conditionElement.Attributes.Append(AddXmlAtribute("Expression", condition));
+            conditionElement.Attributes.Append(CreateXmlAtribute("Expression", condition));
             styleElement.AppendChild(conditionElement);
 
-            var setterElement = _doc.CreateElement("Setter", XmlNamespace);
-            setterElement.Attributes.Append(AddXmlAtribute("Property", propertyName));
-            setterElement.Attributes.Append(AddXmlAtribute("Value", propertyValue));
-            styleElement.AppendChild(setterElement);
+            foreach (var property in properties)
+                styleElement.AppendChild(CreateXmlElement("Setter", new Dictionary<string, string>
+                {
+                     { "Property", property.Key },
+                     { "Value", property.Value }
+                }));
+
+            return styleElement;
         }
 
         #endregion

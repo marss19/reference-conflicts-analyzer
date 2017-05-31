@@ -122,7 +122,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
                 var builder = new GraphBuilder();
                 var doc = builder.BuildDgml(result);
 
-                var path = Path.Combine(Path.GetTempFileName() + ".dgml");
+                var path = Path.Combine(Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".dgml");
                 doc.Save(path);
 
                 Process.Start(path);
