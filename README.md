@@ -4,7 +4,7 @@ This is an extension to Visual Studio for easy visual analysis of the "Could not
 
 After installation it is available in the main menu: Tools -&gt; Analyze Assembly Dependencies.
 
+Download the latest release: https://marketplace.visualstudio.com/vsgallery/051172f3-4b30-4bbc-8da6-d55f70402734
+
 ##### Screenshot 1. Example of output
 ![alt tag](https://github.com/marss19/reference-conflicts-analyzer/blob/master/Docs/output.png)
-
-Download release 1.0.0: https://marketplace.visualstudio.com/vsgallery/051172f3-4b30-4bbc-8da6-d55f70402734
