@@ -26,6 +26,7 @@ namespace ReferenceConflictAnalyser
             AddLinks(root);
             AddCategories(root);
             AddStyles(root);
+            AddProperties(root);
 
             return _doc;
         }
@@ -86,7 +87,9 @@ namespace ReferenceConflictAnalyser
                 {
                     { "Source", reference.Assembly.Name.ToLower()},
                     { "Target", reference.ReferencedAssembly.Name.ToLower()},
-                    { "Label", reference.ReferencedAssembly.Version.ToString()}
+                    { "Label", reference.ReferencedAssembly.Version.ToString()},
+                    { "SourceDetails", reference.Assembly.FullName },
+                    { "TargetDetails", reference.ReferencedAssembly.FullName }
                 }));
         }
 
@@ -98,6 +101,24 @@ namespace ReferenceConflictAnalyser
                 {
                     { "Id", category.Key.ToString() },
                     { "Label", EnumHelper.GetDescription(category.Key)}
+                }));
+        }
+
+        private void AddProperties(XmlNode parent)
+        {
+            var propertiesElement = parent.AppendChild(_doc.CreateElement("Properties", XmlNamespace));
+
+            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
+                {
+                    { "Id", "SourceDetails" },
+                    { "DataType", "System.String" },
+                    { "Label", "Source Node Details"}
+                }));
+            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
+                {
+                    { "Id", "TargetDetails" },
+                    { "DataType", "System.String" },
+                    { "Label", "Target Node Details"}
                 }));
         }
 
