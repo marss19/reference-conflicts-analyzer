@@ -82,6 +82,8 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
                 string configPath;
                 if (ConfigurationHelper.TrySuggestConfigFile(AssemblyPath, out configPath))
                     ConfigPath = configPath;
+                else
+                    ConfigPath = "";
             }
         }
 
