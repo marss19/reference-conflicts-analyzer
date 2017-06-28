@@ -18,5 +18,12 @@ namespace ReferenceConflictAnalyser.Utils
                 ? ((DescriptionAttribute)attributes[0]).Description
                 : value.ToString();
         }
+
+        public static Dictionary<T, string> GetValuesWithDescriptions<T>()
+        {
+            return Enum.GetValues(typeof(T))
+                .Cast<T>()
+                .ToDictionary(x => x, x => GetDescription<T>(x));
+        }
     }
 }

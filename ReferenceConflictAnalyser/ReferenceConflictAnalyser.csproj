@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures\ExtraNodeProperty.cs" />
+    <Compile Include="DataStructures\LoadingError.cs" />
     <Compile Include="DataStructures\ReferencedAssembly.cs" />
     <Compile Include="DataStructures\Category.cs" />
     <Compile Include="ConfigurationHelper.cs" />

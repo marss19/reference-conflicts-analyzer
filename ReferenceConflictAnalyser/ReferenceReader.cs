@@ -10,6 +10,7 @@ using System.Configuration;
 
 namespace ReferenceConflictAnalyser
 {
+
     public class ReferenceReader
     {
         public ReferenceList Read(string entryAssemblyFilePath, string configFilePath, bool skipSystemAssemblies = true)
@@ -52,7 +53,8 @@ namespace ReferenceConflictAnalyser
                     )
                     continue;
 
-                var referencedAssembly = LoadReferencedAssembly(reference);
+                LoadingError error;
+                var referencedAssembly = LoadReferencedAssembly(reference, out error);
                 if (referencedAssembly != null)
                 {
                     var isNewReference = _result.AddReference(assembly.GetName(), reference, Category.Normal);
@@ -61,20 +63,23 @@ namespace ReferenceConflictAnalyser
                 }
                 else
                 {
-                    _result.AddReference(assembly.GetName(), reference, Category.Missed);
+                    _result.AddReference(assembly.GetName(), reference, Category.Missed, error);
                 }
             }
 
         }
 
-        private Assembly LoadReferencedAssembly(AssemblyName reference)
+        private Assembly LoadReferencedAssembly(AssemblyName reference, out LoadingError error)
         {
+            error = null;
+
             if (_cache.ContainsKey(reference.FullName))
                 return _cache[reference.FullName];
 
             Assembly assembly = null;
             try
             {
+                //assembly = Assembly.ReflectionOnlyLoad(reference.FullName);
                 var files = Directory.GetFiles(_workingDirectory, reference.Name + ".???", SearchOption.TopDirectoryOnly);
                 var file = files.FirstOrDefault(x => x.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
                 if (file != null)
@@ -86,8 +91,9 @@ namespace ReferenceConflictAnalyser
                     assembly = Assembly.ReflectionOnlyLoad(reference.FullName);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                error = new LoadingError(e);
             }
 
             _cache.Add(reference.FullName, assembly);

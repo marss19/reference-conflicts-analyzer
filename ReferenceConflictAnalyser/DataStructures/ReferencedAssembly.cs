@@ -25,6 +25,7 @@ namespace ReferenceConflictAnalyser.DataStructures
         //public string PublicKeyToken { get; private set; }
         public Version Version { get; private set; }
         public AssemblyName AssemblyName { get; private set; }
+        public LoadingError LoadingError { get; set; }
 
         private int _hashCode;
         

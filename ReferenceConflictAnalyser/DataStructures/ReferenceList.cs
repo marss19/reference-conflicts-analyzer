@@ -14,14 +14,15 @@ namespace ReferenceConflictAnalyser.DataStructures
             AddAssembly(assembly, Category.EntryPoint);
         }
 
-        public bool AddReference(AssemblyName assembly, AssemblyName referencedAssembly, Category category)
+        public bool AddReference(AssemblyName assembly, AssemblyName referencedAssembly, Category category, LoadingError loadingError = null)
         {
             var reference = new Reference(assembly, referencedAssembly);
 
-            AddAssembly(referencedAssembly, category);
+            AddAssembly(referencedAssembly, category, loadingError);
 
             return _references.Add(reference);
         }
+
 
         public void AddConflict(AssemblyName referencedAssembly)
         {
@@ -44,11 +45,13 @@ namespace ReferenceConflictAnalyser.DataStructures
         private readonly HashSet<Reference> _references = new HashSet<Reference>();
         private readonly Dictionary<ReferencedAssembly, Category> _assemblies = new Dictionary<ReferencedAssembly, Category>();
 
-        private void AddAssembly(AssemblyName assemblyName, Category category)
+        private ReferencedAssembly AddAssembly(AssemblyName assemblyName, Category category, LoadingError loadingError = null)
         {
             var data = new ReferencedAssembly(assemblyName);
+            data.LoadingError = loadingError;
             if (!_assemblies.ContainsKey(data))
                 _assemblies.Add(data, category);
+            return data;
         }
 
 

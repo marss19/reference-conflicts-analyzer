@@ -62,21 +62,46 @@ namespace ReferenceConflictAnalyser
 
         private void AddNodes(XmlNode parent)
         {
-            var uniqueAssemblies = new Dictionary<string, Category>();
+            var uniqueAssemblies = new Dictionary<ReferencedAssembly, Category>();
             foreach (var assembly in _referenceList.Assemblies)
             {
-                if (!uniqueAssemblies.ContainsKey(assembly.Key.Name))
-                    uniqueAssemblies.Add(assembly.Key.Name, assembly.Value);
+                if (!uniqueAssemblies.ContainsKey(assembly.Key))
+                    uniqueAssemblies.Add(assembly.Key, assembly.Value);
             }
 
             var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
             foreach (var item in uniqueAssemblies)
-                nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+            {
+                var referencedAssembly = item.Key;
+                var attributes = new Dictionary<string, string>
                 {
-                    { "Id", item.Key.ToLower()},
-                    { "Label", item.Key},
+                    { "Id", referencedAssembly.Name.ToLower()},
+                    { "Label", referencedAssembly.Name},
                     { "Category", item.Value.ToString()}
-                }));
+                };
+
+                if (referencedAssembly.LoadingError != null)
+                {
+                    attributes.Add(ExtraNodeProperty.LoadingErrorMessage.ToString(), referencedAssembly.LoadingError.Exception.Message);
+                    attributes.Add(ExtraNodeProperty.LoadingErrorType.ToString(), referencedAssembly.LoadingError.Exception.GetType().Name);
+                    if (referencedAssembly.LoadingError.PossibleCauses.Length == 1)
+                    {
+                        attributes.Add(ExtraNodeProperty.LoadingErrorPossibleCause.ToString(), referencedAssembly.LoadingError.PossibleCauses.First());
+                    }
+                    else
+                    {
+                        var number = 1;
+                        foreach (var potentialCause in referencedAssembly.LoadingError.PossibleCauses)
+                        {
+                            attributes.Add($"{ExtraNodeProperty.LoadingErrorPossibleCause}{number}", potentialCause);
+                            number++;
+                        }
+                    }
+                }
+
+                nodesElement.AppendChild(CreateXmlElement("Node", attributes));
+            }
+                
         }
 
         private void AddLinks(XmlNode parent)
@@ -88,8 +113,8 @@ namespace ReferenceConflictAnalyser
                     { "Source", reference.Assembly.Name.ToLower()},
                     { "Target", reference.ReferencedAssembly.Name.ToLower()},
                     { "Label", reference.ReferencedAssembly.Version.ToString()},
-                    { "SourceDetails", reference.Assembly.FullName },
-                    { "TargetDetails", reference.ReferencedAssembly.FullName }
+                    { ExtraNodeProperty.SourceNodeDetails.ToString(), reference.Assembly.FullName },
+                    { ExtraNodeProperty.TargetNodeDetails.ToString(), reference.ReferencedAssembly.FullName }
                 }));
         }
 
@@ -108,18 +133,16 @@ namespace ReferenceConflictAnalyser
         {
             var propertiesElement = parent.AppendChild(_doc.CreateElement("Properties", XmlNamespace));
 
-            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
+            var properties = EnumHelper.GetValuesWithDescriptions<ExtraNodeProperty>();
+            foreach(var property in properties)
+            {
+                propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
                 {
-                    { "Id", "SourceDetails" },
+                    { "Id", property.Key.ToString() },
                     { "DataType", "System.String" },
-                    { "Label", "Source Node Details"}
+                    { "Label", property.Value }
                 }));
-            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
-                {
-                    { "Id", "TargetDetails" },
-                    { "DataType", "System.String" },
-                    { "Label", "Target Node Details"}
-                }));
+            }
         }
 
         private void AddStyles(XmlNode parent)
