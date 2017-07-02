@@ -15,6 +15,8 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
+using EnvDTE;
+using ReferenceConflictAnalyser.VSExtension.UI.Utils;
 
 namespace ReferenceConflictAnalyser.VSExtension
 {
@@ -69,8 +71,11 @@ namespace ReferenceConflictAnalyser.VSExtension
         {
             base.Initialize();
             UI.MenuCommand.Initialize(this);
+
+            DTEHelper.CurrentDTE = (DTE)((System.IServiceProvider)this).GetService(typeof(DTE));
         }
 
         #endregion
+        
     }
 }
