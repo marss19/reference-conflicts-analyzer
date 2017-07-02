@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -70,8 +71,12 @@ namespace ReferenceConflictAnalyser
                     { "Id", referencedAssembly.Name.ToLower()},
                     { "Label", referencedAssembly.Name},
                     { "Category", referencedAssembly.Category.ToString()},
-                    { ExtraNodeProperty.ProcessorArchitecture.ToString(), referencedAssembly.ProcessorArchitecture.ToString()},
                 };
+
+                if (referencedAssembly.ProcessorArchitecture != ProcessorArchitecture.None)
+                {
+                    attributes.Add(ExtraNodeProperty.ProcessorArchitecture.ToString(), referencedAssembly.ProcessorArchitecture.ToString());
+                }
 
                 if (referencedAssembly.ProcessorArchitectureMismatch)
                 {
