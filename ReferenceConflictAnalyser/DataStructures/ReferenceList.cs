@@ -9,51 +9,26 @@ namespace ReferenceConflictAnalyser.DataStructures
 {
     public class ReferenceList 
     {
-        public void AddEntryPoint(AssemblyName assembly)
+        public void AddEntryPoint(ReferencedAssembly referencedAssembly)
         {
-            AddAssembly(assembly, Category.EntryPoint);
+            _assemblies.Add(referencedAssembly);
         }
 
-        public bool AddReference(AssemblyName assembly, AssemblyName referencedAssembly, Category category, LoadingError loadingError = null)
+        public bool AddReference(ReferencedAssembly assembly, ReferencedAssembly referencedAssembly)
         {
+            _assemblies.Add(referencedAssembly);
+
             var reference = new Reference(assembly, referencedAssembly);
-
-            AddAssembly(referencedAssembly, category, loadingError);
-
             return _references.Add(reference);
         }
 
-
-        public void AddConflict(AssemblyName referencedAssembly)
-        {
-            var conflicts = _assemblies.Where(x => x.Key.Name == referencedAssembly.Name && x.Value == Category.Normal).ToArray();
-            foreach(var conflict in conflicts)
-                _assemblies[conflict.Key] = Category.Conflicted;
-        }
-
-        public void MarkConflictAsResolved(ReferencedAssembly referencedAssembly)
-        {
-            _assemblies[referencedAssembly] = Category.ConflictResolved;
-        }
-
-
         public HashSet<Reference> References => _references;
-        public Dictionary<ReferencedAssembly, Category> Assemblies => _assemblies;
+        public HashSet<ReferencedAssembly> Assemblies => _assemblies;
 
         #region private members
 
         private readonly HashSet<Reference> _references = new HashSet<Reference>();
-        private readonly Dictionary<ReferencedAssembly, Category> _assemblies = new Dictionary<ReferencedAssembly, Category>();
-
-        private ReferencedAssembly AddAssembly(AssemblyName assemblyName, Category category, LoadingError loadingError = null)
-        {
-            var data = new ReferencedAssembly(assemblyName);
-            data.LoadingError = loadingError;
-            if (!_assemblies.ContainsKey(data))
-                _assemblies.Add(data, category);
-            return data;
-        }
-
+        private readonly HashSet<ReferencedAssembly> _assemblies = new HashSet<ReferencedAssembly>();
 
         #endregion
     }

@@ -45,7 +45,7 @@ namespace ReferenceConflictAnalyser
             { Category.Conflicted, Color.LightSalmon },
             { Category.Missed, Color.Crimson }
         };
-
+        private Color PlatformTargetMismatchBorder = Color.DarkRed;
         private ReferenceList _referenceList;
         private XmlDocument _doc;
 
@@ -62,40 +62,39 @@ namespace ReferenceConflictAnalyser
 
         private void AddNodes(XmlNode parent)
         {
-            var uniqueAssemblies = new Dictionary<ReferencedAssembly, Category>();
-            foreach (var assembly in _referenceList.Assemblies)
-            {
-                if (!uniqueAssemblies.ContainsKey(assembly.Key))
-                    uniqueAssemblies.Add(assembly.Key, assembly.Value);
-            }
-
             var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
-            foreach (var item in uniqueAssemblies)
+            foreach (var referencedAssembly in _referenceList.Assemblies)
             {
-                var referencedAssembly = item.Key;
                 var attributes = new Dictionary<string, string>
                 {
                     { "Id", referencedAssembly.Name.ToLower()},
                     { "Label", referencedAssembly.Name},
-                    { "Category", item.Value.ToString()}
+                    { "Category", referencedAssembly.Category.ToString()},
+                    { ExtraNodeProperty.ProcessorArchitecture.ToString(), referencedAssembly.ProcessorArchitecture.ToString()},
                 };
+
+                if (referencedAssembly.ProcessorArchitectureMismatch)
+                {
+                    attributes.Add(ExtraNodeProperty.ProcessorArchitectureMismatch.ToString(), referencedAssembly.ProcessorArchitectureMismatch.ToString());
+                }
 
                 if (referencedAssembly.LoadingError != null)
                 {
-                    attributes.Add(ExtraNodeProperty.LoadingErrorMessage.ToString(), referencedAssembly.LoadingError.Exception.Message);
-                    attributes.Add(ExtraNodeProperty.LoadingErrorType.ToString(), referencedAssembly.LoadingError.Exception.GetType().Name);
-                    if (referencedAssembly.LoadingError.PossibleCauses.Length == 1)
+                    attributes.Add(ExtraNodeProperty.LoadingErrorMessage.ToString(), referencedAssembly.LoadingError.Message);
+                    attributes.Add(ExtraNodeProperty.LoadingErrorType.ToString(), referencedAssembly.LoadingError.GetType().Name);
+                }
+
+                if (referencedAssembly.PossibleLoadingErrorCauses.Count == 1)
+                {
+                    attributes.Add(ExtraNodeProperty.LoadingErrorPossibleCause.ToString(), referencedAssembly.PossibleLoadingErrorCauses.First());
+                }
+                else
+                {
+                    var number = 1;
+                    foreach (var potentialCause in referencedAssembly.PossibleLoadingErrorCauses)
                     {
-                        attributes.Add(ExtraNodeProperty.LoadingErrorPossibleCause.ToString(), referencedAssembly.LoadingError.PossibleCauses.First());
-                    }
-                    else
-                    {
-                        var number = 1;
-                        foreach (var potentialCause in referencedAssembly.LoadingError.PossibleCauses)
-                        {
-                            attributes.Add($"{ExtraNodeProperty.LoadingErrorPossibleCause}{number}", potentialCause);
-                            number++;
-                        }
+                        attributes.Add($"{ExtraNodeProperty.LoadingErrorPossibleCause}{number}", potentialCause);
+                        number++;
                     }
                 }
 
@@ -175,6 +174,15 @@ namespace ReferenceConflictAnalyser
                       {
                             { "Stroke", ColorTranslator.ToHtml(_categories[Category.Missed]) },
                             { "StrokeThickness", "3" }
+                      }));
+
+            stylesElement.AppendChild(CreateStyleElement("Node",
+                      "Assembly platform target differs from the entry point platform target",
+                      $"{ExtraNodeProperty.ProcessorArchitectureMismatch} = 'True'",
+                      new Dictionary<string, string>
+                      {
+                            { "Stroke", ColorTranslator.ToHtml(PlatformTargetMismatchBorder) },
+                            { "StrokeThickness", "5" }
                       }));
         }
 
