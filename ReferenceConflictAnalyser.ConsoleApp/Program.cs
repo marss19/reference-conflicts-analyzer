@@ -14,6 +14,7 @@ namespace ReferenceConflictAnalyser.ConsoleApp
         static void Main(string[] args)
         {
             var reader = new ReferenceReader();
+            var analyser = new ReferenceAnalyser();
             var entryAssemblyPath = args[0];
 
             while (string.IsNullOrWhiteSpace(entryAssemblyPath))
@@ -25,7 +26,10 @@ namespace ReferenceConflictAnalyser.ConsoleApp
             string configFilePath;
             ConfigurationHelper.TrySuggestConfigFile(entryAssemblyPath, out configFilePath);
 
-            var result = reader.Read(entryAssemblyPath, configFilePath);
+            var result = reader.Read(entryAssemblyPath);
+
+            result = analyser.AnalyzeReferences(result, ConfigurationHelper.GetBindingRedirects(configFilePath));
+
 
 
             Console.WriteLine("Select outout mode: C - outout to console, D - output to dgml file");
@@ -65,7 +69,7 @@ namespace ReferenceConflictAnalyser.ConsoleApp
             Console.WriteLine();
             Console.WriteLine("Assemblies:");
             foreach (var item in result.Assemblies)
-                Console.WriteLine($"{item.Key.Name} {item.Key.Version}: {item.Value}");
+                Console.WriteLine($"{item.Name} {item.Version}: {item.Category}");
 
             Console.ReadKey();
         }
