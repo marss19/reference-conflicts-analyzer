@@ -9,12 +9,12 @@ namespace ReferenceConflictAnalyser.DataStructures
 {
     public class Reference
     {
-        public Reference(AssemblyName assembly, AssemblyName referencedAssembly)
+        public Reference(ReferencedAssembly assembly, ReferencedAssembly referencedAssembly)
         {
-            Assembly = assembly;
-            ReferencedAssembly = referencedAssembly;
+            Assembly = assembly.AssemblyName;
+            ReferencedAssembly = referencedAssembly.AssemblyName;
 
-            _stringPresentation = string.Concat(assembly.FullName, " -> ", referencedAssembly.FullName);
+            _stringPresentation = string.Concat(Assembly.FullName, " -> ", ReferencedAssembly.FullName);
         }
 
         public AssemblyName Assembly { get; private set; }

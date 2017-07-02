@@ -119,7 +119,12 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             try
             {
                 var reader = new ReferenceReader();
-                var result = reader.Read(AssemblyPath, ConfigPath, IgnoreSystemAssemblies);
+                var result = reader.Read(AssemblyPath, IgnoreSystemAssemblies);
+
+                var bindingRedirects = ConfigurationHelper.GetBindingRedirects(ConfigPath);
+
+                var analyser = new ReferenceAnalyser();
+                result = analyser.AnalyzeReferences(result, bindingRedirects);
 
                 var builder = new GraphBuilder();
                 var doc = builder.BuildDgml(result);
@@ -128,7 +133,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
                 path = Path.ChangeExtension(path, ".dgml");
                 doc.Save(path);
 
-                Process.Start(path);
+                DTEHelper.OpenFile(path);
             }
             catch (Exception ex)
             {

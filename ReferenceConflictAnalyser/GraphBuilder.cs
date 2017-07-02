@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -45,7 +46,7 @@ namespace ReferenceConflictAnalyser
             { Category.Conflicted, Color.LightSalmon },
             { Category.Missed, Color.Crimson }
         };
-
+        private Color PlatformTargetMismatchBorder = Color.DarkRed;
         private ReferenceList _referenceList;
         private XmlDocument _doc;
 
@@ -62,21 +63,49 @@ namespace ReferenceConflictAnalyser
 
         private void AddNodes(XmlNode parent)
         {
-            var uniqueAssemblies = new Dictionary<string, Category>();
-            foreach (var assembly in _referenceList.Assemblies)
-            {
-                if (!uniqueAssemblies.ContainsKey(assembly.Key.Name))
-                    uniqueAssemblies.Add(assembly.Key.Name, assembly.Value);
-            }
-
             var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
-            foreach (var item in uniqueAssemblies)
-                nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+            foreach (var referencedAssembly in _referenceList.Assemblies)
+            {
+                var attributes = new Dictionary<string, string>
                 {
-                    { "Id", item.Key.ToLower()},
-                    { "Label", item.Key},
-                    { "Category", item.Value.ToString()}
-                }));
+                    { "Id", referencedAssembly.Name.ToLower()},
+                    { "Label", referencedAssembly.Name},
+                    { "Category", referencedAssembly.Category.ToString()},
+                };
+
+                if (referencedAssembly.ProcessorArchitecture != ProcessorArchitecture.None)
+                {
+                    attributes.Add(ExtraNodeProperty.ProcessorArchitecture.ToString(), referencedAssembly.ProcessorArchitecture.ToString());
+                }
+
+                if (referencedAssembly.ProcessorArchitectureMismatch)
+                {
+                    attributes.Add(ExtraNodeProperty.ProcessorArchitectureMismatch.ToString(), referencedAssembly.ProcessorArchitectureMismatch.ToString());
+                }
+
+                if (referencedAssembly.LoadingError != null)
+                {
+                    attributes.Add(ExtraNodeProperty.LoadingErrorMessage.ToString(), referencedAssembly.LoadingError.Message);
+                    attributes.Add(ExtraNodeProperty.LoadingErrorType.ToString(), referencedAssembly.LoadingError.GetType().Name);
+                }
+
+                if (referencedAssembly.PossibleLoadingErrorCauses.Count == 1)
+                {
+                    attributes.Add(ExtraNodeProperty.LoadingErrorPossibleCause.ToString(), referencedAssembly.PossibleLoadingErrorCauses.First());
+                }
+                else
+                {
+                    var number = 1;
+                    foreach (var potentialCause in referencedAssembly.PossibleLoadingErrorCauses)
+                    {
+                        attributes.Add($"{ExtraNodeProperty.LoadingErrorPossibleCause}{number}", potentialCause);
+                        number++;
+                    }
+                }
+
+                nodesElement.AppendChild(CreateXmlElement("Node", attributes));
+            }
+                
         }
 
         private void AddLinks(XmlNode parent)
@@ -88,8 +117,8 @@ namespace ReferenceConflictAnalyser
                     { "Source", reference.Assembly.Name.ToLower()},
                     { "Target", reference.ReferencedAssembly.Name.ToLower()},
                     { "Label", reference.ReferencedAssembly.Version.ToString()},
-                    { "SourceDetails", reference.Assembly.FullName },
-                    { "TargetDetails", reference.ReferencedAssembly.FullName }
+                    { ExtraNodeProperty.SourceNodeDetails.ToString(), reference.Assembly.FullName },
+                    { ExtraNodeProperty.TargetNodeDetails.ToString(), reference.ReferencedAssembly.FullName }
                 }));
         }
 
@@ -108,18 +137,16 @@ namespace ReferenceConflictAnalyser
         {
             var propertiesElement = parent.AppendChild(_doc.CreateElement("Properties", XmlNamespace));
 
-            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
+            var properties = EnumHelper.GetValuesWithDescriptions<ExtraNodeProperty>();
+            foreach(var property in properties)
+            {
+                propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
                 {
-                    { "Id", "SourceDetails" },
+                    { "Id", property.Key.ToString() },
                     { "DataType", "System.String" },
-                    { "Label", "Source Node Details"}
+                    { "Label", property.Value }
                 }));
-            propertiesElement.AppendChild(CreateXmlElement("Property", new Dictionary<string, string>
-                {
-                    { "Id", "TargetDetails" },
-                    { "DataType", "System.String" },
-                    { "Label", "Target Node Details"}
-                }));
+            }
         }
 
         private void AddStyles(XmlNode parent)
@@ -152,6 +179,15 @@ namespace ReferenceConflictAnalyser
                       {
                             { "Stroke", ColorTranslator.ToHtml(_categories[Category.Missed]) },
                             { "StrokeThickness", "3" }
+                      }));
+
+            stylesElement.AppendChild(CreateStyleElement("Node",
+                      "Assembly platform target differs from the entry point platform target",
+                      $"{ExtraNodeProperty.ProcessorArchitectureMismatch} = 'True'",
+                      new Dictionary<string, string>
+                      {
+                            { "Stroke", ColorTranslator.ToHtml(PlatformTargetMismatchBorder) },
+                            { "StrokeThickness", "5" }
                       }));
         }
 

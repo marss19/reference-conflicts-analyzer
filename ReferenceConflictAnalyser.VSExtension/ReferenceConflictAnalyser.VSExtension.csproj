@@ -64,6 +64,7 @@
       <DependentUpon>SelectAssemblyWindowControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\SelectAssemblyWindowViewModel.cs" />
+    <Compile Include="UI\Utils\DTEHelper.cs" />
     <Compile Include="UI\Utils\GenericCommand.cs" />
   </ItemGroup>
   <ItemGroup>
