@@ -133,7 +133,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
                 path = Path.ChangeExtension(path, ".dgml");
                 doc.Save(path);
 
-                Process.Start(path);
+                DTEHelper.OpenFile(path);
             }
             catch (Exception ex)
             {
