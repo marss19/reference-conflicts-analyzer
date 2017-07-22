@@ -17,11 +17,13 @@ namespace ReferenceConflictAnalyser
 
             FindConflicts();
             FindResolvedConflicts(bindingRedirects);
+            AddExplanationToUnresolvedConflicts();
             AddExplanationToLoadingErrors();
             FindProcessorArchitectureMismatch();
 
             return _referenceList;
         }
+
 
         #region private
 
@@ -58,15 +60,16 @@ namespace ReferenceConflictAnalyser
             foreach (var conflict in conflicts)
             {
                 var bindingRedirect = bindingRedirects.FirstOrDefault(x => x.AssemblyName == conflict.Name);
-                if (bindingRedirect == null)
-                    continue;
-
-                var mainVersion = new Version(conflict.Version.Major, conflict.Version.Minor);
-
-                if (mainVersion >= bindingRedirect.OldVersionLowerBound
-                   && mainVersion <= bindingRedirect.OldVersionUpperBound)
+                if (bindingRedirect != null)
                 {
-                    conflict.Category = Category.VersionsConflictResolved;
+                    var mainVersion = new Version(conflict.Version.Major, conflict.Version.Minor);
+
+                    if (mainVersion >= bindingRedirect.OldVersionLowerBound
+                       && mainVersion <= bindingRedirect.OldVersionUpperBound)
+                    {
+                        conflict.Category = Category.VersionsConflictResolved;
+                        continue;
+                    }
                 }
             }
         }
@@ -102,6 +105,16 @@ namespace ReferenceConflictAnalyser
                 }
             }
         }
+
+        private void AddExplanationToUnresolvedConflicts()
+        {
+            var conflicts = _referenceList.Assemblies.Where(x => x.Category == Category.VersionsConflicted).ToArray();
+            foreach (var conflict in conflicts)
+            {
+                conflict.PossibleLoadingErrorCauses.Add($"Different versions of this assembly are referenced by other assemblies. See reference links for details.");
+            }
+        }
+
 
         private void FindProcessorArchitectureMismatch()
         {

@@ -100,8 +100,11 @@ namespace ReferenceConflictAnalyser
                 if (file != null)
                 {
                     referencedAssemblyReferences = Assembly.ReflectionOnlyLoadFrom(file).GetReferencedAssemblies();
-                    //reload the assembly name from the file (reason: the assembly name taken from the assembly loaded by the reflection only load is not complete)
-                    reference = AssemblyName.GetAssemblyName(file);
+                    
+                    //read additional information from file as the assembly name loaded by the ReflectionOnly load is not complete.
+                    var temp = AssemblyName.GetAssemblyName(file);
+                    if (temp.FullName == reference.FullName)
+                        reference.ProcessorArchitecture = temp.ProcessorArchitecture;
                 }
                 else
                 {
