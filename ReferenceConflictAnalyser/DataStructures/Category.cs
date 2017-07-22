@@ -15,14 +15,19 @@ namespace ReferenceConflictAnalyser.DataStructures
         [Description("Normal reference")]
         Normal,
 
-        [Description("Conflicted reference")]
-        Conflicted,
+        [Description("Versions conflict")]
+        VersionsConflicted,
 
-        [Description("Conflicted reference but resolved by means of config file")]
-        ConflictResolved,
+        [Description("Other conflict")]
+        OtherConflict,
 
-        [Description("Missed assembly")]
+        [Description("Versions conflict is resolved by config file")]
+        VersionsConflictResolved,
+
+        [Description("Assembly is missed or failed to load")]
         Missed,
 
+        [Description("Detailed information")]
+        Comment
     }
 }

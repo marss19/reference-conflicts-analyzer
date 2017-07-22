@@ -39,7 +39,7 @@ namespace ReferenceConflictAnalyser
                     {
                         var conflicts = _referenceList.Assemblies.Where(x => x.Name == reference.ReferencedAssembly.Name && x.Category == Category.Normal).ToArray();
                         foreach (var conflict in conflicts)
-                            conflict.Category = Category.Conflicted;
+                            conflict.Category = Category.VersionsConflicted;
                     }
                 }
                 else
@@ -54,7 +54,7 @@ namespace ReferenceConflictAnalyser
             if (bindingRedirects == null || !bindingRedirects.Any())
                 return;
 
-            var conflicts = _referenceList.Assemblies.Where(x => x.Category == Category.Conflicted).ToArray();
+            var conflicts = _referenceList.Assemblies.Where(x => x.Category == Category.VersionsConflicted).ToArray();
             foreach (var conflict in conflicts)
             {
                 var bindingRedirect = bindingRedirects.FirstOrDefault(x => x.AssemblyName == conflict.Name);
@@ -66,7 +66,7 @@ namespace ReferenceConflictAnalyser
                 if (mainVersion >= bindingRedirect.OldVersionLowerBound
                    && mainVersion <= bindingRedirect.OldVersionUpperBound)
                 {
-                    conflict.Category = Category.ConflictResolved;
+                    conflict.Category = Category.VersionsConflictResolved;
                 }
             }
         }
@@ -95,9 +95,9 @@ namespace ReferenceConflictAnalyser
                 {
                     referencedAssembly.PossibleLoadingErrorCauses.AddRange(new[]
                     {
-                        "The assembly was developed with a later version of the .NET Framework then one which is used to load the assembly.",
-                        "Attempt to load an unmanaged dynamic link library or executable (such as a Windows system DLL) as if it were a .NET Framework assembly.",
-                        "The assembly built as a 32-bit assembly is loaded as a 64-bit assembly, and vice versa."
+                        "Either the assembly was developed with a later version of the .NET Framework then one which is used to load the assembly.",
+                        "Or the assembly is not a .NET Framework assembly but an unmanaged dynamic link library or executable (such as a Windows system DLL).",
+                        "Or the assembly built as a 32-bit assembly is loaded as a 64-bit assembly, and vice versa."
                     });
                 }
             }
@@ -128,8 +128,9 @@ namespace ReferenceConflictAnalyser
 
             foreach (var referencedAssembly in mismatched)
             {
-                referencedAssembly.ProcessorArchitectureMismatch = true;
-                referencedAssembly.PossibleLoadingErrorCauses.Add("The platform target (processor architecture) of the assembly differs from the entry point's platform target.");
+                referencedAssembly.PossibleLoadingErrorCauses.Add($"The assembly platform target ({referencedAssembly.ProcessorArchitecture}) differs from the entry point assembly platform target ({processorArchitecture}).");
+                if (referencedAssembly.Category == Category.Normal || referencedAssembly.Category == Category.VersionsConflictResolved)
+                    referencedAssembly.Category = Category.OtherConflict;
             }
         }
 

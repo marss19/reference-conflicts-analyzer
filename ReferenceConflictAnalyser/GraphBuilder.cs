@@ -41,10 +41,12 @@ namespace ReferenceConflictAnalyser
         private readonly Dictionary<Category, Color> _categories = new Dictionary<Category, Color>()
         {
             { Category.EntryPoint, Color.LightGreen },
-            { Category.Normal , Color.White },
-            { Category.ConflictResolved, Color.Khaki },
-            { Category.Conflicted, Color.LightSalmon },
-            { Category.Missed, Color.Crimson }
+            { Category.Normal , Color.MintCream },
+            { Category.VersionsConflicted, Color.LightSalmon },
+            { Category.OtherConflict, Color.Coral },
+            { Category.VersionsConflictResolved, Color.Khaki },
+            { Category.Missed, Color.Crimson },
+            { Category.Comment, Color.White }
         };
         private Color PlatformTargetMismatchBorder = Color.DarkRed;
         private ReferenceList _referenceList;
@@ -66,51 +68,68 @@ namespace ReferenceConflictAnalyser
             var nodesElement = parent.AppendChild(_doc.CreateElement("Nodes", XmlNamespace));
             foreach (var referencedAssembly in _referenceList.Assemblies)
             {
+                var nodeId = referencedAssembly.Name.ToLower();
+
                 var attributes = new Dictionary<string, string>
                 {
-                    { "Id", referencedAssembly.Name.ToLower()},
+                    { "Id", nodeId},
                     { "Label", referencedAssembly.Name},
                     { "Category", referencedAssembly.Category.ToString()},
+                    { "Icon", "CodeSchema_Assembly"}
                 };
 
                 if (referencedAssembly.ProcessorArchitecture != ProcessorArchitecture.None)
                 {
                     attributes.Add(ExtraNodeProperty.ProcessorArchitecture.ToString(), referencedAssembly.ProcessorArchitecture.ToString());
                 }
-
-                if (referencedAssembly.ProcessorArchitectureMismatch)
-                {
-                    attributes.Add(ExtraNodeProperty.ProcessorArchitectureMismatch.ToString(), referencedAssembly.ProcessorArchitectureMismatch.ToString());
-                }
-
-                if (referencedAssembly.LoadingError != null)
-                {
-                    attributes.Add(ExtraNodeProperty.LoadingErrorMessage.ToString(), referencedAssembly.LoadingError.Message);
-                    attributes.Add(ExtraNodeProperty.LoadingErrorType.ToString(), referencedAssembly.LoadingError.GetType().Name);
-                }
-
-                if (referencedAssembly.PossibleLoadingErrorCauses.Count == 1)
-                {
-                    attributes.Add(ExtraNodeProperty.LoadingErrorPossibleCause.ToString(), referencedAssembly.PossibleLoadingErrorCauses.First());
-                }
-                else
-                {
-                    var number = 1;
-                    foreach (var potentialCause in referencedAssembly.PossibleLoadingErrorCauses)
-                    {
-                        attributes.Add($"{ExtraNodeProperty.LoadingErrorPossibleCause}{number}", potentialCause);
-                        number++;
-                    }
-                }
-
                 nodesElement.AppendChild(CreateXmlElement("Node", attributes));
+
+                if (HasCommentNode(referencedAssembly))
+                {
+                    nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+                    {
+                        { "Id", GetCommentNodeId(nodeId)},
+                        { "Label", BuildComment(referencedAssembly)},
+                        { "Category", Category.Comment.ToString()}
+                    }));
+                }
             }
-                
+        }
+
+
+        private string BuildComment(ReferencedAssembly referencedAssembly)
+        {
+            var comment = new StringBuilder();
+
+            if (referencedAssembly.LoadingError != null)
+            {
+                comment.AppendLine($"Error message: {referencedAssembly.LoadingError.Message}");
+                comment.AppendLine($"Error type: {referencedAssembly.LoadingError.GetType().Name}.");
+            }
+
+            if (referencedAssembly.PossibleLoadingErrorCauses != null && referencedAssembly.PossibleLoadingErrorCauses.Any())
+            {
+                comment.AppendLine($"Details: {string.Join("; ", referencedAssembly.PossibleLoadingErrorCauses)}");
+            }
+
+            return comment.ToString();
+        }
+
+        private bool HasCommentNode(ReferencedAssembly referencedAssembly)
+        {
+            return referencedAssembly.LoadingError != null || referencedAssembly.PossibleLoadingErrorCauses.Any();
+        }
+
+        private string GetCommentNodeId(string assemblyNodeId)
+        {
+            return $"{assemblyNodeId}..comment";
         }
 
         private void AddLinks(XmlNode parent)
         {
             var linksElement = parent.AppendChild(_doc.CreateElement("Links", XmlNamespace));
+
+            //link assemblies
             foreach (var reference in _referenceList.References)
                 linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
                 {
@@ -120,6 +139,18 @@ namespace ReferenceConflictAnalyser
                     { ExtraNodeProperty.SourceNodeDetails.ToString(), reference.Assembly.FullName },
                     { ExtraNodeProperty.TargetNodeDetails.ToString(), reference.ReferencedAssembly.FullName }
                 }));
+
+            //link comments to assemblies
+            var assembliesWithComments = _referenceList.Assemblies.Where(HasCommentNode);
+            foreach (var referencedAssembly in assembliesWithComments)
+            {
+                var nodeId = referencedAssembly.Name.ToLower();
+                linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
+                {
+                    { "Source", nodeId},
+                    { "Target", GetCommentNodeId(nodeId)}
+                }));
+            }
         }
 
         private void AddCategories(XmlNode parent)
@@ -154,21 +185,31 @@ namespace ReferenceConflictAnalyser
             var stylesElement = parent.AppendChild(_doc.CreateElement("Styles", XmlNamespace));
             foreach (var category in _categories)
             {
+                var properties = new Dictionary<string, string>
+                {
+                     { "Background", ColorTranslator.ToHtml(category.Value) }
+                };
+                if (category.Key == Category.Comment)
+                {
+                    properties.Add("MaxWidth", "300");
+                    properties.Add("NodeRadius", "15");
+                    properties.Add("Foreground", ColorTranslator.ToHtml(Color.Gray));
+                }
+                    
+
                 stylesElement.AppendChild(CreateStyleElement("Node", 
                     EnumHelper.GetDescription(category.Key), 
                     $"HasCategory('{category.Key}')", 
-                    new Dictionary<string, string>
-                                {
-                                        { "Background", ColorTranslator.ToHtml(category.Value) }
-                                }));
+                    properties
+                    ));
             }
 
             stylesElement.AppendChild(CreateStyleElement("Link",
                       "Link to conflicted reference",
-                      $"Target.HasCategory('{Category.Conflicted}')",
+                      $"Target.HasCategory('{Category.VersionsConflicted}')",
                       new Dictionary<string, string>
                       {
-                            { "Stroke", ColorTranslator.ToHtml(_categories[Category.Conflicted]) },
+                            { "Stroke", ColorTranslator.ToHtml(_categories[Category.VersionsConflicted]) },
                             { "StrokeThickness", "3" }
                       }));
 
@@ -180,15 +221,14 @@ namespace ReferenceConflictAnalyser
                             { "Stroke", ColorTranslator.ToHtml(_categories[Category.Missed]) },
                             { "StrokeThickness", "3" }
                       }));
-
-            stylesElement.AppendChild(CreateStyleElement("Node",
-                      "Assembly platform target differs from the entry point platform target",
-                      $"{ExtraNodeProperty.ProcessorArchitectureMismatch} = 'True'",
+            stylesElement.AppendChild(CreateStyleElement("Link",
+                      "Link to detailed information",
+                      $"Target.HasCategory('{Category.Comment}')",
                       new Dictionary<string, string>
                       {
-                            { "Stroke", ColorTranslator.ToHtml(PlatformTargetMismatchBorder) },
-                            { "StrokeThickness", "5" }
+                          { "StrokeDashArray", "2 2" }
                       }));
+
         }
 
         private XmlElement CreateXmlElement(string elementName, Dictionary<string, string> attributes)
