@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ff477521-e67b-4ca3-931f-3edf36125d28" Version="1.0.4" Language="en-US" Publisher="Mykola Tarasyuk" />
+        <Identity Id="ff477521-e67b-4ca3-931f-3edf36125d28" Version="1.0.5" Language="en-US" Publisher="Mykola Tarasyuk" />
         <DisplayName>Reference Conflicts Analyser</DisplayName>
         <Description xml:space="preserve">A tool for analysis of the "Could not load file or assembly or one of its dependencies" problem and issues related to conflicts of referenced assemblies.</Description>
         <License>Resources\LICENSE</License>
