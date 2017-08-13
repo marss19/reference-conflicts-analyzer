@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace ReferenceConflictAnalyser
 {
-    public class TempAppDomainWrapper
+    public class Workflow
     {
-        public static string AnalyzeAssemblies(string entryAssemblyFilePath, string configPath, bool skipSystemAssemblies = true)
+        public static string CreateDependenciesGraph(string entryAssemblyFilePath, string configPath, bool skipSystemAssemblies = true)
         {
             var info = new AppDomainSetup()
             {
@@ -27,7 +27,7 @@ namespace ReferenceConflictAnalyser
                 tempDomain.SetData(SkipSystemAssembliesKey, skipSystemAssemblies);
                 tempDomain.SetData(ConfigPathKey, configPath);
 
-                tempDomain.DoCallBack(DoWork);
+                tempDomain.DoCallBack(DoWorkInTempAppDomain);
 
                 var graphDgml = tempDomain.GetData(GraphKey);
 
@@ -50,7 +50,7 @@ namespace ReferenceConflictAnalyser
         private const string ConfigPathKey = "configPath";
         private const string GraphKey = "GraphKey";
 
-        private static void DoWork()
+        private static void DoWorkInTempAppDomain()
         {
             var entryAssemblyFilePath = AppDomain.CurrentDomain.GetData(EntryAssemblyFilePathKey).ToString();
             var configPath = AppDomain.CurrentDomain.GetData(ConfigPathKey).ToString();

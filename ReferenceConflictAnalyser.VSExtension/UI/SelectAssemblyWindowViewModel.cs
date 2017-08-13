@@ -118,7 +118,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
         {
             try
             {
-                var graphDgml = TempAppDomainWrapper.AnalyzeAssemblies(AssemblyPath, ConfigPath, IgnoreSystemAssemblies);
+                var graphDgml = Workflow.CreateDependenciesGraph(AssemblyPath, ConfigPath, IgnoreSystemAssemblies);
 
                 var path = Path.GetTempFileName();
                 path = Path.ChangeExtension(path, ".dgml");

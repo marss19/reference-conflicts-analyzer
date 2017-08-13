@@ -59,7 +59,7 @@
     <Compile Include="DataStructures\Reference.cs" />
     <Compile Include="ReferenceAnalyser.cs" />
     <Compile Include="ReferenceReader.cs" />
-    <Compile Include="TempAppDomainWrapper.cs" />
+    <Compile Include="Workflow.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
   </ItemGroup>
   <ItemGroup>
