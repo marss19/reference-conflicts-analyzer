@@ -42,7 +42,7 @@ namespace ReferenceConflictAnalyser.VSExtension
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(ReferenceConflictAnalyserPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-    [ProvideToolWindow(typeof(UI.SelectAssemblyWindow), Style = VsDockStyle.AlwaysFloat, Height = 170, Width = 600, MultiInstances = false)]
+    [ProvideToolWindow(typeof(UI.SelectAssemblyWindow), Style = VsDockStyle.Float, Height = 170, Width = 600, MultiInstances = false, Transient = true)]
     public sealed class ReferenceConflictAnalyserPackage : Package
     {
         /// <summary>
