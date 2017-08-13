@@ -28,6 +28,9 @@ namespace ReferenceConflictAnalyser.DataStructures
         Missed,
 
         [Description("Detailed information")]
-        Comment
+        Comment,
+
+        [Description("Unused assemblies")]
+        UnusedAssembly
     }
 }

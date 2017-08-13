@@ -29,6 +29,7 @@ namespace ReferenceConflictAnalyser
             _result.AddEntryPoint(entryPoint);
 
             ReadReferencesRecursively(entryPoint, entryPointReferences);
+            ReadUnusedAssemblies();
 
             return _result;
         }
@@ -121,6 +122,37 @@ namespace ReferenceConflictAnalyser
                 _cache.Add(reference.FullName, referencedAssembly);
 
             return referencedAssembly;
+        }
+
+        private void ReadUnusedAssemblies()
+        {
+            var loadedAssemblies = _result.Assemblies.Select(x => x.Name);
+
+            var allFiles = Directory
+                .GetFiles(_workingDirectory, "*.exe", SearchOption.TopDirectoryOnly)
+                .Concat(Directory
+                      .GetFiles(_workingDirectory, "*.dll", SearchOption.TopDirectoryOnly));
+
+            foreach(var filePath in allFiles)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(filePath);
+
+                if (!loadedAssemblies.Contains(fileName, StringComparer.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var assemblyName = AssemblyName.GetAssemblyName(filePath);
+                        _result.Assemblies.Add(new ReferencedAssembly(assemblyName)
+                        {
+                            Category = Category.UnusedAssembly
+                        });
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+                }
+            }          
         }
 
         #endregion

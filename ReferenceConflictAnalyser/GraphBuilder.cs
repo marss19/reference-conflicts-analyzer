@@ -46,11 +46,15 @@ namespace ReferenceConflictAnalyser
             { Category.OtherConflict, Color.Coral },
             { Category.VersionsConflictResolved, Color.Khaki },
             { Category.Missed, Color.Crimson },
-            { Category.Comment, Color.White }
+            { Category.Comment, Color.White },
+            { Category.UnusedAssembly, Color.Gray }
         };
         private Color PlatformTargetMismatchBorder = Color.DarkRed;
         private ReferenceList _referenceList;
         private XmlDocument _doc;
+
+        private const string UnusedGroupNodeId = "UnusedGroupNodeId";
+        private const string UnusedGroupNodeCommentId = "UnusedGroupNodeCommentId";
 
 
         private XmlNode AddRootElement()
@@ -94,8 +98,24 @@ namespace ReferenceConflictAnalyser
                     }));
                 }
             }
-        }
 
+            // add container for unused assemblies and comment for it
+            if (_referenceList.Assemblies.Any(x => x.Category == Category.UnusedAssembly))
+            {
+                nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+                    {
+                        { "Id", UnusedGroupNodeId },
+                        { "Label", "Unused assemblies?" },
+                        { "Group", "Expanded" }
+                    }));
+                nodesElement.AppendChild(CreateXmlElement("Node", new Dictionary<string, string>
+                    {
+                        { "Id", UnusedGroupNodeCommentId },
+                        { "Label", "These assemblies are not referended by any assembly from the graph explicitly. However, they can be loaded in runtime by Assembly and AppDomain methods." },
+                        { "Category", Category.Comment.ToString() }
+                    }));
+            }
+        }
 
         private string BuildComment(ReferencedAssembly referencedAssembly)
         {
@@ -150,6 +170,37 @@ namespace ReferenceConflictAnalyser
                     { "Source", nodeId},
                     { "Target", GetCommentNodeId(nodeId)}
                 }));
+            }
+
+            //group unused assemblies
+            var unusedAssemblies = _referenceList.Assemblies.Where(x => x.Category == Category.UnusedAssembly);
+            if (unusedAssemblies.Any())
+            {
+                linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
+                {
+                    { "Source", UnusedGroupNodeId},
+                    { "Target", UnusedGroupNodeCommentId}
+                }));
+
+                foreach (var assembly in unusedAssemblies)
+                {
+                    linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
+                    {
+                        { "Source", UnusedGroupNodeId},
+                        { "Target", assembly.Name.ToLower()},
+                        { "Category", "Contains" }
+                    }));
+
+                    if (HasCommentNode(assembly))
+                    {
+                        linksElement.AppendChild(CreateXmlElement("Link", new Dictionary<string, string>
+                        {
+                                { "Source", UnusedGroupNodeId},
+                                { "Target", GetCommentNodeId(assembly.Name.ToLower())},
+                                { "Category", "Contains" }
+                        }));
+                    }
+                }
             }
         }
 
