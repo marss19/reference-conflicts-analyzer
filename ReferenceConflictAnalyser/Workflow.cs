@@ -56,13 +56,13 @@ namespace ReferenceConflictAnalyser
             var configPath = AppDomain.CurrentDomain.GetData(ConfigPathKey).ToString();
             var skipSystemAssemblies = (bool)AppDomain.CurrentDomain.GetData(SkipSystemAssembliesKey);
 
-            var reader = new ReferenceReader();
-            var result = reader.Read(entryAssemblyFilePath, skipSystemAssemblies);
+            var bindingData = ConfigurationHelper.GetBindingRedirects(configPath);
 
-            var bindingRedirects = ConfigurationHelper.GetBindingRedirects(configPath);
+            var reader = new ReferenceReader();
+            var result = reader.Read(entryAssemblyFilePath, bindingData.SubFolders, skipSystemAssemblies);
 
             var analyser = new ReferenceAnalyser();
-            result = analyser.AnalyzeReferences(result, bindingRedirects);
+            result = analyser.AnalyzeReferences(result, bindingData.BindingRedirects);
 
             var builder = new GraphBuilder();
             var doc = builder.BuildDgml(result);

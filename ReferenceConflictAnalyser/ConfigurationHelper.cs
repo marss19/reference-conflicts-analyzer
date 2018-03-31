@@ -47,12 +47,13 @@ namespace ReferenceConflictAnalyser
             return configFilePath != null;
         }
 
-        public static IEnumerable< BindingRedirectData> GetBindingRedirects(string configFilePath)
+        public static BindingData GetBindingRedirects(string configFilePath)
         {
             if (string.IsNullOrEmpty(configFilePath) || !File.Exists(configFilePath))
-                return Enumerable.Empty<BindingRedirectData>();
+                return new BindingData();
 
             var redirects = new List<BindingRedirectData>();
+            string[] subFolders = null;
             try
             {
                 var doc = new XmlDocument();
@@ -60,6 +61,14 @@ namespace ReferenceConflictAnalyser
 
                 var nsmgr = new XmlNamespaceManager(doc.NameTable);
                 nsmgr.AddNamespace("bind", "urn:schemas-microsoft-com:asm.v1");
+
+                var probingNode = doc.SelectSingleNode("//bind:probing", nsmgr);
+                if (probingNode != null)
+                {
+                    var str = probingNode.Attributes["privatePath"]?.Value;
+                    if (!string.IsNullOrEmpty(str))
+                        subFolders = str.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries); 
+                }
 
                 var nodes = doc.SelectNodes("//bind:dependentAssembly", nsmgr);
                 foreach(XmlElement node in nodes)
@@ -86,7 +95,7 @@ namespace ReferenceConflictAnalyser
             catch (ConfigurationErrorsException)
             {
             }
-            return redirects;
+            return new BindingData(redirects, subFolders);
         }
 
         private static Version GetMainVersion(string versionStr)

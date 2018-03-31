@@ -13,7 +13,7 @@ namespace ReferenceConflictAnalyser
 
     public class ReferenceReader
     {
-        public ReferenceList Read(string entryAssemblyFilePath, bool skipSystemAssemblies = true)
+        public ReferenceList Read(string entryAssemblyFilePath, IEnumerable<string> subDirectories, bool skipSystemAssemblies)
         {
             if (!File.Exists(entryAssemblyFilePath))
                 throw new ArgumentException(string.Format("File does not exist: {0}", entryAssemblyFilePath));
@@ -22,8 +22,20 @@ namespace ReferenceConflictAnalyser
             _result = new ReferenceList();
             _cache = new Dictionary<string, ReferencedAssembly>();
 
-            _workingDirectory = Path.GetDirectoryName(entryAssemblyFilePath);
-
+            var workingDirectory = Path.GetDirectoryName(entryAssemblyFilePath);
+            _searchDirectories = new List<string>() { workingDirectory };
+            try
+            {
+                if (subDirectories != null)
+                    _searchDirectories.AddRange(subDirectories
+                                                    .Select(x => Path.Combine(workingDirectory, x))
+                                                    .Where(x => Directory.Exists(x))); 
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"\"runtime/assemblyBinding/probing\" element in the config file contains invalid paths. {e.Message}");          
+            }
+ 
             AssemblyName[] entryPointReferences;
             var entryPoint = LoadEntryPoint(entryAssemblyFilePath, out entryPointReferences);
             _result.AddEntryPoint(entryPoint);
@@ -38,7 +50,7 @@ namespace ReferenceConflictAnalyser
 
         private bool _skipSystemAssemblies;
         private ReferenceList _result;
-        private string _workingDirectory;
+        private List<string> _searchDirectories;
         private Dictionary<string, ReferencedAssembly> _cache;
 
         private void ReadReferencesRecursively(ReferencedAssembly assembly, AssemblyName[] references)
@@ -96,8 +108,15 @@ namespace ReferenceConflictAnalyser
             ReferencedAssembly referencedAssembly;
             try
             {
-                var files = Directory.GetFiles(_workingDirectory, reference.Name + ".???", SearchOption.TopDirectoryOnly);
-                var file = files.FirstOrDefault(x => x.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+                string file = null;
+                foreach(var dir in _searchDirectories)
+                {
+                    var files = Directory.GetFiles(dir, reference.Name + ".???", SearchOption.TopDirectoryOnly);
+                    file = files.FirstOrDefault(x => x.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+                    if (file != null)
+                        break;
+                }
+
                 if (file != null)
                 {
                     referencedAssemblyReferences = Assembly.ReflectionOnlyLoadFrom(file).GetReferencedAssemblies();
@@ -128,10 +147,14 @@ namespace ReferenceConflictAnalyser
         {
             var loadedAssemblies = _result.Assemblies.Select(x => x.Name);
 
-            var allFiles = Directory
-                .GetFiles(_workingDirectory, "*.exe", SearchOption.TopDirectoryOnly)
-                .Concat(Directory
-                      .GetFiles(_workingDirectory, "*.dll", SearchOption.TopDirectoryOnly));
+            var allFiles = new List<string>();
+            foreach(var dir in _searchDirectories)
+            {
+                allFiles.AddRange(Directory
+                    .GetFiles(dir, "*.exe", SearchOption.TopDirectoryOnly)
+                    .Concat(Directory
+                          .GetFiles(dir, "*.dll", SearchOption.TopDirectoryOnly)));
+            }
 
             foreach(var filePath in allFiles)
             {

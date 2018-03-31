@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures\BindingData.cs" />
     <Compile Include="DataStructures\ExtraNodeProperty.cs" />
     <Compile Include="DataStructures\ReferencedAssembly.cs" />
     <Compile Include="DataStructures\Category.cs" />
