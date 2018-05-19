@@ -9,3 +9,16 @@ Documentation: http://www.marss.co.ua/2017/05/reference-conflicts-analyzer-visua
 
 ##### Screenshot 1. Example of output
 ![alt tag](https://github.com/marss19/reference-conflicts-analyzer/blob/master/Docs/Screenshots/output.png)
+
+
+The command line version is intended to be used on production servers without Visual Studio installed. It generates a DGML file which can be open on a different machine where Visual Studio with DGML viewer is installed. 
+
+Example of usage:
+```
+ReferenceConflictAnalyzer.CommandLine.exe -file="C:\Program Files\Some App\someapp.exe" -config="C:\Program Files\Some App\someapp.exe.config" -output="C:\temp"
+```
+
+More details on parameters:
+```
+ReferenceConflictAnalyzer.CommandLine.exe help
+```
