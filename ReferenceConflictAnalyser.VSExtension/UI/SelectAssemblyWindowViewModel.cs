@@ -26,6 +26,8 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
 
             IgnoreSystemAssemblies = true;
 
+            Warning = "*The extension relies on the built-in DGML editor. In case you see the raw XML instead of the diagram run Visual Studio Installer, then: Modify -> Individual Components -> Code Tools -> Install DGML editor.";
+
             _window = window;
         }
 
@@ -51,6 +53,12 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             set { SetProperty(ref _ignoreSystemAssemblies, value, "IgnoreSystemAssemblies"); }
         }
 
+        public string Warning
+        {
+            get { return _warning; }
+            set { SetProperty(ref _warning, value, "Warning"); }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region private
@@ -58,6 +66,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
         private string _assemblyPath;
         private string _configPath;
         private bool _ignoreSystemAssemblies;
+        private string _warning;
         private ToolWindowPane _window;
 
         private void SetProperty<T>(ref T field, T newValue, string propertyName)
@@ -137,7 +146,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
             return !string.IsNullOrWhiteSpace(AssemblyPath);
         }
 
-
+  
 
 
 

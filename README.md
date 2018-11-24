@@ -24,3 +24,6 @@ More details on parameters:
 ReferenceConflictAnalyzer.CommandLine.exe help
 ```
 Download the latest release of the command line utility: https://github.com/marss19/reference-conflicts-analyzer/releases
+
+#### Troubleshooting.
+Note: The extension relies on the built-in DGML editor. In case you see the raw XML instead of the diagram run Visual Studio Installer, then: Modify -> Individual Components -> Code Tools -> Install DGML editor.
