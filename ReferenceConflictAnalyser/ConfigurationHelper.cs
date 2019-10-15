@@ -81,7 +81,7 @@ namespace ReferenceConflictAnalyser
                     var data = new BindingRedirectData()
                     {
                         AssemblyName = assemblyIdentityElem.Attributes["name"].Value,
-                        PublicKeyToken = assemblyIdentityElem.Attributes["publicKeyToken"].Value,
+                        PublicKeyToken = assemblyIdentityElem.Attributes["publicKeyToken"]?.Value,
                         NewVersion = new Version(bindingRedirectElem.Attributes["newVersion"].Value)
                     };
 
