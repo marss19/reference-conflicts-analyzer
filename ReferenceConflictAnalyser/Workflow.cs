@@ -53,7 +53,7 @@ namespace ReferenceConflictAnalyser
         private static void DoWorkInTempAppDomain()
         {
             var entryAssemblyFilePath = AppDomain.CurrentDomain.GetData(EntryAssemblyFilePathKey).ToString();
-            var configPath = AppDomain.CurrentDomain.GetData(ConfigPathKey).ToString();
+            var configPath = AppDomain.CurrentDomain.GetData(ConfigPathKey)?.ToString();
             var skipSystemAssemblies = (bool)AppDomain.CurrentDomain.GetData(SkipSystemAssembliesKey);
 
             var bindingData = ConfigurationHelper.GetBindingRedirects(configPath);
