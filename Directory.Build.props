@@ -3,6 +3,9 @@
     <PropertyGroup>
         <Copyright>Copyright ©  2018 Mykola Tarasyuk</Copyright>
         <Version>1.0.10.0</Version>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/marss19/reference-conflicts-analyzer</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/marss19/reference-conflicts-analyzer.git</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
