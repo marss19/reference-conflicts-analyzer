@@ -1,2 +1,4 @@
 Debug
 Release
+/packages
+/.vs/ReferenceConflictAnalyser/v16/*.suo
