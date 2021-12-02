@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="ff477521-e67b-4ca3-931f-3edf36125d28" Version="1.0.11.0" Language="en-US" Publisher="Mykola Tarasyuk" />
-    <DisplayName>Reference Conflicts Analyser</DisplayName>
-    <Description xml:space="preserve">A tool for analysis of the "Could not load file or assembly or one of its dependencies" problem and issues related to conflicts of referenced assemblies.</Description>
-    <MoreInfo>https://marketplace.visualstudio.com/items?itemName=MykolaTarasyuk.ReferenceConflictsAnalyser</MoreInfo>
-    <License>Resources\LICENSE</License>
-    <Icon>Resources\icon-90x90.png</Icon>
-    <PreviewImage>Resources\icon-175x175.png</PreviewImage>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[12.0,)" />
-    <InstallationTarget Version="[12.0,)" Id="Microsoft.VisualStudio.Pro" />
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-    <Dependency Id="Microsoft.VisualStudio.MPF.12.0" DisplayName="Visual Studio MPF 12.0" d:Source="Installed" Version="[12.0,)" />
-  </Dependencies>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-  </Assets>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" />
-  </Prerequisites>
+    <Metadata>
+        <Identity Id="B902EABD-81B7-43B9-B845-D2D47D9F71DB" Version="2.0.0.0" Language="en-US" Publisher="Mykola Tarasyuk" />
+        <DisplayName>Reference Conflicts Analyser 2022</DisplayName>
+        <Description xml:space="preserve">A tool for analysis of the "Could not load file or assembly or one of its dependencies" problem and issues related to conflicts of referenced assemblies.</Description>
+        <MoreInfo>https://marketplace.visualstudio.com/items?itemName=MykolaTarasyuk.ReferenceConflictsAnalyserVS2022</MoreInfo>
+        <License>Resources\LICENSE</License>
+        <Icon>Resources\icon-90x90.png</Icon>
+        <PreviewImage>Resources\icon-175x175.png</PreviewImage>
+    </Metadata>
+    <Installation InstalledByMsi="false">
+        <InstallationTarget Version="[17.0,)" Id="Microsoft.VisualStudio.Pro" >
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0,)" Id="Microsoft.VisualStudio.Community" >
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+        <Dependency Id="Microsoft.VisualStudio.MPF.12.0" DisplayName="Visual Studio MPF 12.0" d:Source="Installed" Version="[12.0,)" />
+    </Dependencies>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" />
+    </Prerequisites>
 </PackageManifest>

@@ -2,3 +2,6 @@ Debug
 Release
 /packages
 /.vs/ReferenceConflictAnalyser/v16/*.suo
+/.vs/ReferenceConflictAnalyser
+/ReferenceConflictAnalyser.VSExtension/obj
+/ReferenceConflictAnalyser.VSExtension/*.user

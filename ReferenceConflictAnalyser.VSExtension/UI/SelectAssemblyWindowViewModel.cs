@@ -26,7 +26,7 @@ namespace ReferenceConflictAnalyser.VSExtension.UI
 
             IgnoreSystemAssemblies = true;
 
-            Warning = "*The extension relies on the built-in DGML editor. In case you see the raw XML instead of the diagram run Visual Studio Installer, then: Modify -> Individual Components -> Code Tools -> Install DGML editor.";
+            Warning = "*The extension relies on the built-in DGML editor. In case you see a raw XML instead of a diagram run Visual Studio Installer, then: Modify -> Individual Components -> Code Tools -> Install DGML editor.";
 
             _window = window;
         }

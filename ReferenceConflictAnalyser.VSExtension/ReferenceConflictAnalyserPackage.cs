@@ -17,6 +17,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 using EnvDTE;
 using ReferenceConflictAnalyser.VSExtension.UI.Utils;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ReferenceConflictAnalyser.VSExtension
 {
@@ -37,13 +39,13 @@ namespace ReferenceConflictAnalyser.VSExtension
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(ReferenceConflictAnalyserPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideToolWindow(typeof(UI.SelectAssemblyWindow), Style = VsDockStyle.Float, Height = 210, Width = 600, MultiInstances = false, Transient = true)]
-    public sealed class ReferenceConflictAnalyserPackage : Package
+    public sealed class ReferenceConflictAnalyserPackage : AsyncPackage
     {
         /// <summary>
         /// ReferenceConflictAnalyserPackage GUID string.
@@ -67,7 +69,7 @@ namespace ReferenceConflictAnalyser.VSExtension
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
-        protected override void Initialize()
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             base.Initialize();
             UI.MenuCommand.Initialize(this);
